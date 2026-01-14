@@ -10,7 +10,7 @@ class MovingObject(simpleGE.Sprite):
         self.colorRect("Green", (50, 50))
         
     def process(self):
-        """Handles movement, checks for barrier collisions and calls collisionPhysics accordingly"""
+        """Tests movement, checks for barrier collisions and calls collisionPhysics accordingly"""
 
         self.speed = 0
 
@@ -40,3 +40,42 @@ class MovingObject(simpleGE.Sprite):
             self.setAngle(45)
         
         def process(self):
+            
+            """Tests angle of reflection when colliding against barrier"""
+            
+            if self.isKeyPressed(pygame.K_UP):
+                self.speed += .1
+            if self.isKeyPressed(pygame.K_DOWN):
+                self.speed -= .1
+            if self.isKeyPressed(pygame.K_LEFT):
+                self.imageAngle += 5
+                self.moveAngle += 5
+            if self.isKeyPressed(pygame.K_RIGHT):
+                self.imageAngle -= 5
+                self.moveAngle -= 5
+            
+            if self.isKeyPressed(pygame.K_w):
+                self.boundAction = self.WRAP
+            elif self.isKeyPressed(pygame.K_b):
+                self.boundAction = self.BOUNCE
+            
+            self.scene.lblOut.text = f"m: {self.moveAngle}, i: {self.imageAngle}"
+            
+            barrier = self.scene.barrier
+            angle = self.moveAngle % 360
+            
+            if angle < 45:
+                direction = "right"
+            elif angle <135:
+                direction = "up"
+            elif angle < 225:
+                direction = "left"
+            elif angle < 315:
+                direction = "down"
+            else:
+                direction = "right"
+                
+            if self.collidesWith(barrier):
+                collisionResult = collisionPhysics.handleAngleOfCollision(self, barrier)
+            
+            
