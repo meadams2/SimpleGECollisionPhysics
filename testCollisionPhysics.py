@@ -51,7 +51,7 @@ class CollisionScene(simpleGE.Scene):
         testSAT = self.sprite1.collidesWithAdvanced(self.sprite2)
         testSimple = self.sprite1.collidesWith(self.sprite2)
         
-        print(f" SAT: {testSAT} | Simple {testSimple}")
+        print(f" SAT: {testSAT} | Simple: {testSimple}")
         
 if __name__ == "__main__":
     scene = CollisionScene()
