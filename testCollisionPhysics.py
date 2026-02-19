@@ -19,21 +19,21 @@ class TestSprite(CollisionPhysics.CollisionPhysics):
         # Allow for movement of first sprite only to test
         if self.active:
             if self.isKeyPressed(pygame.K_LEFT):
-                self.x -= 3
+                self.x -= 1
             if self.isKeyPressed(pygame.K_RIGHT):
-                self.x += 3
+                self.x += 1
             if self.isKeyPressed(pygame.K_UP):
-                self.y -= 3
+                self.y -= 1
             if self.isKeyPressed(pygame.K_DOWN):
-                self.y += 3
+                self.y += 1
         
         # Rotation
             if self.isKeyPressed(pygame.K_q):
-                self.imageAngle += 3
-                self.moveAngle += 3
+                self.imageAngle += 1
+                self.moveAngle += 1
             if self.isKeyPressed(pygame.K_e):
-                self.imageAngle -= 3
-                self.moveAngle -= 3
+                self.imageAngle -= 1
+                self.moveAngle -= 1
 
 class CollisionScene(simpleGE.Scene):
     def __init__(self):
