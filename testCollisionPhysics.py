@@ -84,8 +84,20 @@ class CollisionScene(simpleGE.Scene):
     def update(self):
         super().update()
         
-        testSAT = self.sprite1.collidesWithAdvanced(self.sprite2)
-        testAABB = self.sprite1.collidesWith(self.sprite2)
+        testSAT = False
+        testAABB = False
+        
+        sprite1SAT = self.sprite1.collidesWithAdvanced(self.sprite2)
+        sprite1AABB = self.sprite1.collidesWith(self.sprite2)
+        
+        sprite2SAT = self.sprite2.collidesWithAdvanced(self.sprite1)
+        sprite2AABB = self.sprite2.collidesWithAdvanced(self.sprite1)
+        
+        if sprite1SAT or sprite2SAT:
+            testSAT = True
+        
+        if sprite1AABB or sprite2AABB:
+            testAABB = True
         
         self.lblOut.text = f"SAT: {testSAT} , AABB: {testAABB}"
         
