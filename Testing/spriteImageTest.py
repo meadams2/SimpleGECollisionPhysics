@@ -59,15 +59,24 @@ class MovyThing(CollisionPhysics.CollisionPhysics):
             self.imageAngle -= 1
             self.moveAngle -= 1
 
-class LblOut(simpleGE.Label):
+class CollisionOut(simpleGE.Label):
     def __init__(self):
         super().__init__()
-        self.center = (320, 30)
-        self.size = (500, 30)
+        self.center = (500, 30)
+        self.size = (300, 30)
         self.fgColor = "blue"
         self.bgColor = "white"
         self.clearBack = True
-
+        
+class AngleOut(simpleGE.Label):
+    def __init__(self):
+        super().__init__()
+        self.center = (100, 30)
+        self.size = (300, 30)
+        self.fgColor = "blue"
+        self.bgColor = "white"
+        self.clearBack = True
+        
 class CollisionScene(simpleGE.Scene):
     def __init__(self):
         super().__init__()
@@ -76,9 +85,10 @@ class CollisionScene(simpleGE.Scene):
         
         self.charlie = Charlie(self, 30)
         self.box = MovyThing(self, -20)
-        self.lblOut = LblOut()
+        self.collisionLbl = CollisionOut()
+        self.angleLbl = AngleOut()
         
-        self.sprites = [self.charlie, self.box, self.lblOut]
+        self.sprites = [self.charlie, self.box, self.collisionLbl, self.angleLbl]
         
     def update(self):
         super().update()
@@ -86,18 +96,25 @@ class CollisionScene(simpleGE.Scene):
         testSAT = False
         testAABB = False
         
-        charlieSAT = self.charlie.collidesWithAdvanced(self.box)
+        collisionNormal = None
+        collisionAngle = 0
+        
+        charlieSAT, collisionNormal, collisionAngle = self.charlie.collidesWithAdvanced(self.box)
         charlieAABB = self.charlie.collidesWith(self.box)
         
-        boxSAT = self.box.collidesWithAdvanced(self.charlie)
+        boxSAT, collisionNormal, collisionAngle = self.box.collidesWithAdvanced(self.charlie)
         boxAABB = self.box.collidesWith(self.charlie)
         
         if charlieSAT or boxSAT:
             testSAT = True
+            self.angleLbl.text = f"Angle: {collisionAngle:.2f}"
+        else:
+            self.angleLbl.text = "Angle: None"
+            
         if charlieAABB or boxAABB:
             testAABB = True
         
-        self.lblOut.text = f"SAT: {testSAT}, AABB: {testAABB}"
+        self.collisionLbl.text = f"SAT: {testSAT}, AABB: {testAABB}"
 def main():
     game = CollisionScene()
     game.start()
