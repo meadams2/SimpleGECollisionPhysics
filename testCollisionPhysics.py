@@ -60,11 +60,20 @@ class DriveSprite(CollisionPhysics.CollisionPhysics):
             self.imageAngle -= 1
             self.moveAngle -= 1
 
-class LblOut(simpleGE.Label):
+class CollisionOut(simpleGE.Label):
     def __init__(self):
         super().__init__()
-        self.center = (320, 30)
-        self.size = (500, 30)
+        self.center = (500, 30)
+        self.size = (300, 30)
+        self.fgColor = "blue"
+        self.bgColor = "white"
+        self.clearBack = True
+
+class AngleOut(simpleGE.Label):
+    def __init__(self):
+        super().__init__()
+        self.center = (100, 30)
+        self.size = (300, 30)
         self.fgColor = "blue"
         self.bgColor = "white"
         self.clearBack = True
@@ -77,29 +86,28 @@ class CollisionScene(simpleGE.Scene):
         
         self.sprite1 = MoveSprite(self, "red", (120, 60), 300, 300, 30)
         self.sprite2 = DriveSprite(self, "blue", (100, 40), 500, 200, -20)
-        self.lblOut = LblOut()
+        self.collisionLbl = CollisionOut()
+        self.angleLbl = AngleOut()
     
-        self.sprites = [self.sprite1, self.sprite2, self.lblOut]
+        self.sprites = [self.sprite1, self.sprite2, self.collisionLbl, self.angleLbl]
         
     def update(self):
         super().update()
         
-        testSAT = False
-        testAABB = False
+        collisionNormal = None
+        collisionAngle = 0
         
-        sprite1SAT = self.sprite1.collidesWithAdvanced(self.sprite2)
-        sprite1AABB = self.sprite1.collidesWith(self.sprite2)
+        spriteSAT, collisionNormal, collisionAngle = self.sprite1.collidesWithAdvanced(self.sprite2)
+        spriteAABB = self.sprite1.collidesWith(self.sprite2)
         
-        sprite2SAT = self.sprite2.collidesWithAdvanced(self.sprite1)
-        sprite2AABB = self.sprite2.collidesWithAdvanced(self.sprite1)
+        self.collisionLbl.text = f"SAT: {spriteSAT}, AABB: {spriteAABB}"
         
-        if sprite1SAT or sprite2SAT:
-            testSAT = True
+        if spriteSAT:
+            self.angleLbl.text = f"Angle: {collisionAngle:.2f}"
+        else:
+            self.angleLbl.text = "Angle: None"
         
-        if sprite1AABB or sprite2AABB:
-            testAABB = True
-        
-        self.lblOut.text = f"SAT: {testSAT} , AABB: {testAABB}"
+       
         
 def main():
     game = CollisionScene()

@@ -11,13 +11,14 @@ class CollisionPhysics(simpleGE.Sprite):
         self.originPolygon = []
     
     def collidesWithAdvanced(self, target):
-        """Boolean function. Returns True if the sprite
+        """Returns collision, normal, angle. Returns True if the sprite
            is currently colliding with the target sprite,
-           false otherwise.
+           false otherwise. Normal is the MTV axis.
+           Angle is the angle of impact in degrees
            Utilizes SAT collision detection"""
         # Check visibility
         if not self.visible or not target.visible:
-            return False
+            return False, None, None
         
         # Convert sprite edges to geometric vectors
         spritePolygon = self.spriteToPolygon()
@@ -26,6 +27,9 @@ class CollisionPhysics(simpleGE.Sprite):
         # Get edges from both shapes
         spriteEdges = self.getEdges(spritePolygon)
         targetEdges = self.getEdges(targetPolygon)
+        
+        smallestOverlap = float("inf")
+        collisionNormal = None
         
         for edge in spriteEdges + targetEdges:
             # Get perpendicular axis
@@ -37,11 +41,23 @@ class CollisionPhysics(simpleGE.Sprite):
             
             # Check for separating axis
             if maxSprite < minTarget:
-                return False
+                return False, None, None
             if maxTarget < minSprite:
-                return False
+                return False, None, None
             
-        return True
+            overlap = min(maxSprite, maxTarget) - max(minSprite, minTarget)
+            
+            if overlap < smallestOverlap:
+                smallestOverlap = overlap
+                collisionNormal = axis
+            
+        direction = Vector2(target.x - self.x, target.y - self.y)
+        if direction.dot(collisionNormal) < 0:
+            collisionNormal = -collisionNormal
+        
+        impactAngle = collisionNormal.as_polar()[1]
+
+        return True, collisionNormal, impactAngle
         
         
     def buildRectangularPolygon(self):
