@@ -12,10 +12,10 @@ class Player(CollisionPhysics.CollisionPhysics):
         self.walkAnim = simpleGE.SpriteSheet("characterSprite.png", (64, 64), 4, 9, .1)
         
         # Define smaller hitbox size for better collisions
-        self.hitboxSize = (30, 30)
+        self.hitboxSize = (20, 14)
         
         # LPC sprites usually have upper space and feet near bottom. Positive Y in offset moves hitbox down
-        self.setHitboxOffset(0, 10)
+        self.setHitboxOffset(0, 22)
         self.walkAnim.startCol = 1
         self.animRow = 2
         self.moveSpeed = 2
