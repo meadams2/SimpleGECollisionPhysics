@@ -9,6 +9,11 @@ class CollisionPhysics(simpleGE.Sprite):
     def __init__(self, scene):
         super().__init__(scene)
         self.originPolygon = []
+        self.hitboxSize = None
+        self.hitboxOffset = Vector2(0, 0)
+    
+    def setHitboxOffset(self, x, y):
+        self.hitboxOffset = Vector2(x, y)
     
     def collidesWithAdvanced(self, target):
         """Returns collision, normal, angle. Returns True if the sprite

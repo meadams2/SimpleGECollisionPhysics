@@ -11,6 +11,11 @@ class Player(CollisionPhysics.CollisionPhysics):
         super().__init__(scene)
         self.walkAnim = simpleGE.SpriteSheet("characterSprite.png", (64, 64), 4, 9, .1)
         
+        # Define smaller hitbox size for better collisions
+        self.hitboxSize = (30, 30)
+        
+        # LPC sprites usually have upper space and feet near bottom. Positive Y in offset moves hitbox down
+        self.setHitboxOffset(0, 10)
         self.walkAnim.startCol = 1
         self.animRow = 2
         self.moveSpeed = 2
@@ -18,27 +23,33 @@ class Player(CollisionPhysics.CollisionPhysics):
         self.copyImage(self.walkAnim.getCellImage(0, self.animRow))
         
     def process(self):
-        self.dx = 0
-        self.dy = 0
+        moveX = 0
+        moveY = 0
         walking = False
         
         if self.isKeyPressed(pygame.K_UP):
             self.animRow = 0
-            self.dy =- self.moveSpeed
+            moveY =- self.moveSpeed
             walking = True
+        
         if self.isKeyPressed(pygame.K_LEFT):
             self.animRow = 1
-            self.dx =- self.moveSpeed
+            moveX =- self.moveSpeed
             walking = True
         if self.isKeyPressed(pygame.K_DOWN):
             self.animRow = 2
-            self.dy = self.moveSpeed
+            moveY = self.moveSpeed
             walking = True
         if self.isKeyPressed(pygame.K_RIGHT):
             self.animRow = 3
-            self.dx = self.moveSpeed
+            moveX = self.moveSpeed
             walking = True
+            
+        # Try movement
+        self.x += moveX
+        self.y += moveY
         
+        # Animation
         if walking:
             self.copyImage(self.walkAnim.getNext(self.animRow))
         else:
@@ -50,6 +61,7 @@ class Box(CollisionPhysics.CollisionPhysics):
         self.colorRect("blue", (120, 60))
         self.x = 300
         self.y = 300
+        self.hitboxSize = (120, 60)
         self.setAngle(angle)
         self.moveAngle = angle
         self.speed = 0
