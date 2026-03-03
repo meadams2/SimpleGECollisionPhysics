@@ -64,8 +64,8 @@ class CollisionPhysics(simpleGE.Sprite):
         """Gets Rectangular polygon based on imageMaster.
            Helper function.
            Centered at origin."""
-        width = self.imageMaster.get_width()
-        height = self.imageMaster.get_height()
+        width = self.image.get_width()
+        height = self.image.get_height()
         
         self.originPolygon = [
             Vector2(-width/2, -height/2),
