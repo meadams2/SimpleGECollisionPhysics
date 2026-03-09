@@ -11,10 +11,10 @@ class CollisionPhysics(simpleGE.Sprite):
         self.originPolygon = []
         self.hitboxSize = None
         self.hitboxOffset = Vector2(0, 0)
-        
+    
     def setHitboxOffset(self, x, y):
         self.hitboxOffset = Vector2(x, y)
-        
+    
     def collidesWithAdvanced(self, target):
         """Returns collision, normal, angle. Returns True if the sprite
            is currently colliding with the target sprite,
@@ -63,7 +63,6 @@ class CollisionPhysics(simpleGE.Sprite):
         impactAngle = collisionNormal.as_polar()[1]
 
         return True, collisionNormal, impactAngle
-        
     def resolveCollision(self, targetSprite, mode, restitution, moveOther):
         """Handles the physics of a collision for two types of collisions.
 
@@ -90,7 +89,7 @@ class CollisionPhysics(simpleGE.Sprite):
         
         # Slight separation to prevent sprites from "sticking"
         separationAmount = 2
-        self.x += normal.x * seaprationAmount
+        self.x += normal.x * separationAmount
         self.y += normal.y * separationAmount
         
         # Velocity vector
@@ -112,7 +111,7 @@ class CollisionPhysics(simpleGE.Sprite):
         self.speedAngleFromVector()
         
         # If moveOther = true, will affect other object
-        if moveother and has attr(targetSprite, "dx"):
+        if moveOther and hasattr(targetSprite, "dx"):
             otherVelocity = Vector2(targetSprite.dx, targetSprite.dy)
             oppositeNormal = -normal
             
@@ -127,17 +126,13 @@ class CollisionPhysics(simpleGE.Sprite):
             targetSprite.speedAngleFromVector()
         
         return True
-            
+        
     def buildRectangularPolygon(self):
         """Gets Rectangular polygon based on imageMaster.
            Helper function.
            Centered at origin."""
-        
-        if self.hitboxSize:
-            width, height = self.hitboxSize
-        else:
-            width = self.image.get_width()
-            height = self.image.get_height()
+        width = self.imageMaster.get_width()
+        height = self.imageMaster.get_height()
         
         self.originPolygon = [
             Vector2(-width/2, -height/2),
@@ -150,16 +145,13 @@ class CollisionPhysics(simpleGE.Sprite):
            Sprite's actual screen position & represents real shape
            Geometry conversion"""
         
-        self.buildRectangularPolygon()
+        if len(self.originPolygon) == 0:
+            self.buildRectangularPolygon()
         
         polygonEdgePoints = []
         
         for point in self.originPolygon:
             rotated = point.rotate(-self.imageAngle)
-            
-            #Add offset before shifting position
-            rotated += self.hitboxOffset
-            
             # Calculate point not centered at origin
             calculatedPoint = rotated + Vector2(self.x, self.y)
             polygonEdgePoints.append(calculatedPoint)

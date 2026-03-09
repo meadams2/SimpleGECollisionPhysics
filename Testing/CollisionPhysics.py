@@ -63,7 +63,69 @@ class CollisionPhysics(simpleGE.Sprite):
         impactAngle = collisionNormal.as_polar()[1]
 
         return True, collisionNormal, impactAngle
+    def resolveCollision(self, targetSprite, mode, restitution, moveOther):
+        """Handles the physics of a collision for two types of collisions.
+
+            mode:
+                bounce -> elastic collision, reflects velocity
+                slide -> removes normal component & continues along surface
+                
+            restitution:
+                controls bounciness (1=perfect bounce, <1 means we lose energy)
+                
+            moveOther:
+                True, applies response to both objects for dynamic bodies
+                
+            Returns True if collision occurred"""
         
+        # Automatically look for collisions
+        collided, normal, angle = self.collidesWithAdvanced(targetSprite)
+        
+        # Will not run the rest of code if False
+        if not collided:
+            return False
+        
+        normal = normal.normalize()
+        
+        # Slight separation to prevent sprites from "sticking"
+        separationAmount = 2
+        self.x += normal.x * separationAmount
+        self.y += normal.y * separationAmount
+        
+        # Velocity vector
+        velocity = Vector2(self.dx, self.dy)
+        
+        if mode == "bounce":
+            # Reflect velocity
+            newVelocity = velocity -(1+restitution)*velocity.dot(normal)* normal
+        elif mode == "slide":
+            # Remove velocity component into surface
+            normalComponent = velocity.dot(normal) * normal
+            newVelocity = velocity - normalComponent
+        else:
+            raise ValueError("Mode must be bounce or slide")
+        
+        # Apply new velocity
+        self.dx = newVelocity.x
+        self.dy = newVelocity.y
+        self.speedAngleFromVector()
+        
+        # If moveOther = true, will affect other object
+        if moveOther and hasattr(targetSprite, "dx"):
+            otherVelocity = Vector2(targetSprite.dx, targetSprite.dy)
+            oppositeNormal = -normal
+            
+            if mode == "bounce":
+                otherNewVel = otherVelocity - (1+restitution)*otherVelocity.dot(oppositeNormal) * oppositeNormal
+            else:
+                normalComponent = otherVelocity.dot(oppositeNormal) * oppositeNormal
+                otherNewVel = otherVelocity - normalComponent
+            
+            targetSprite.dx = otherNewVel.x
+            targetSprite.dy = otherNewVel.y
+            targetSprite.speedAngleFromVector()
+        
+        return True
         
     def buildRectangularPolygon(self):
         """Gets Rectangular polygon based on imageMaster.
