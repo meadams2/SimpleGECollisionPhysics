@@ -1,10 +1,10 @@
-"""physicsTest.py
-Testing Physics Portion of Collision Physics
+"""slideCollisionTest.py
+Testing sliding collisions of two objects
 Marianne Adams, 2026"""
 
 import CollisionPhysics, simpleGE, pygame
 
-class MoveSprite(CollisionPhysics.CollisionPhysics):
+class DriveSprite(CollisionPhysics.CollisionPhysics):
     def __init__(self, scene, color, size, x, y, angle=0):
         super().__init__(scene)
         self.colorRect(color, size)
@@ -12,27 +12,25 @@ class MoveSprite(CollisionPhysics.CollisionPhysics):
         self.y = y
         self.setAngle(angle)
         self.moveAngle = angle
-        self.speed = 0
+        self.speed = 2
+        self.vectorFromSpeedAngle()
         
     def process(self):
-        if self.isKeyPressed(pygame.K_LEFT):
-            self.x -= 1
-        if self.isKeyPressed(pygame.K_RIGHT):
-            self.x += 1
-        if self.isKeyPressed(pygame.K_UP):
-            self.y -= 1
-        if self.isKeyPressed(pygame.K_DOWN):
-            self.y += 1
-        
-        # Rotation
         if self.isKeyPressed(pygame.K_q):
-            self.imageAngle += 1
-            self.moveAngle += 1
+            self.moveAngle += 3
+            self.imageAngle += 3
+            self.vectorFromSpeedAngle()
+            
         if self.isKeyPressed(pygame.K_e):
-            self.imageAngle -= 1
-            self.moveAngle -= 1
+            self.moveAngle -= 3
+            self.imageAngle -= 3
+            self.vectorFromSpeedAngle()
+            
+        #Move automatically
+        self.x += self.dx
+        self.y += self.dy
         
-class DriveSprite(CollisionPhysics.CollisionPhysics):
+class WallSprite(CollisionPhysics.CollisionPhysics):
     def __init__(self, scene, color, size, x, y, angle=0):
         super().__init__(scene)
         self.colorRect(color, size)
@@ -75,19 +73,19 @@ class CollisionScene(simpleGE.Scene):
         self.background.fill("gray")
         self.setCaption("Test Physics with Collisions")
         
-        self.moveSprite = MoveSprite(self, "red", (60, 60), 300, 300, 30)
-        self.driveSprite = DriveSprite(self, "blue", (100, 40), 500, 200, -20)
+        self.driveSprite = DriveSprite(self, "red", (60, 60), 300, 300, 30)
+        self.wall = WallSprite(self, "blue", (100, 40), 500, 200, -20)
         self.collisionLbl = CollisionOut()
         
-        self.sprites = [self.moveSprite, self.driveSprite, self.collisionLbl]
+        self.sprites = [self.driveSprite, self.wall, self.collisionLbl]
         
     def update(self):
         super().update()
         
-        moveSpriteAABB = self.moveSprite.collidesWith(self.driveSprite)
-        moveSpriteSAT = self.moveSprite.resolveCollision(self.driveSprite, "bounce", 1, False)
+        driveAABB = self.driveSprite.collidesWith(self.wall)
+        driveSAT = self.driveSprite.resolveCollision(self.wall, "slide", 0.8, True)
         
-        self.collisionLbl.text = f"SAT: {moveSpriteSAT}, AABB: {moveSpriteAABB}"
+        self.collisionLbl.text = f"SAT: {driveSAT}, AABB: {driveAABB}"
 
 def main():
     game = CollisionScene()

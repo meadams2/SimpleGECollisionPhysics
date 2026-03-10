@@ -46,9 +46,9 @@ class CollisionPhysics(simpleGE.Sprite):
             
             # Check for separating axis
             if maxSprite < minTarget:
-                return False, None, None
+                return False, None, None, None
             if maxTarget < minSprite:
-                return False, None, None
+                return False, None, None, None
             
             overlap = min(maxSprite, maxTarget) - max(minSprite, minTarget)
             
@@ -62,7 +62,8 @@ class CollisionPhysics(simpleGE.Sprite):
         
         impactAngle = collisionNormal.as_polar()[1]
 
-        return True, collisionNormal, impactAngle
+        return True, collisionNormal, impactAngle, smallestOverlap
+    
     def resolveCollision(self, targetSprite, mode, restitution, moveOther):
         """Handles the physics of a collision for two types of collisions.
 
@@ -79,7 +80,7 @@ class CollisionPhysics(simpleGE.Sprite):
             Returns True if collision occurred"""
         
         # Automatically look for collisions
-        collided, normal, angle = self.collidesWithAdvanced(targetSprite)
+        collided, normal, angle, overlap = self.collidesWithAdvanced(targetSprite)
         
         # Will not run the rest of code if False
         if not collided:
@@ -88,16 +89,17 @@ class CollisionPhysics(simpleGE.Sprite):
         normal = normal.normalize()
         
         # Slight separation to prevent sprites from "sticking"
-        separationAmount = 2
-        self.x += normal.x * separationAmount
-        self.y += normal.y * separationAmount
+        self.x -= normal.x * overlap
+        self.y -= normal.y * overlap
         
         # Velocity vector
         velocity = Vector2(self.dx, self.dy)
+        newVelocity = velocity
         
         if mode == "bounce":
             # Reflect velocity
-            newVelocity = velocity -(1+restitution)*velocity.dot(normal)* normal
+            if velocity.dot(normal) < 0:
+                newVelocity = velocity -(1+restitution)*velocity.dot(normal)* normal
         elif mode == "slide":
             # Remove velocity component into surface
             normalComponent = velocity.dot(normal) * normal
@@ -106,6 +108,7 @@ class CollisionPhysics(simpleGE.Sprite):
             raise ValueError("Mode must be bounce or slide")
         
         # Apply new velocity
+    
         self.dx = newVelocity.x
         self.dy = newVelocity.y
         self.speedAngleFromVector()
@@ -114,9 +117,11 @@ class CollisionPhysics(simpleGE.Sprite):
         if moveOther and hasattr(targetSprite, "dx"):
             otherVelocity = Vector2(targetSprite.dx, targetSprite.dy)
             oppositeNormal = -normal
+            otherNewVel = otherVelocity
             
             if mode == "bounce":
-                otherNewVel = otherVelocity - (1+restitution)*otherVelocity.dot(oppositeNormal) * oppositeNormal
+                if otherVelocity.dot(oppositeNormal) < 0:
+                    otherNewVel = otherVelocity - (1+restitution)*otherVelocity.dot(oppositeNormal) * oppositeNormal
             else:
                 normalComponent = otherVelocity.dot(oppositeNormal) * oppositeNormal
                 otherNewVel = otherVelocity - normalComponent
@@ -131,8 +136,11 @@ class CollisionPhysics(simpleGE.Sprite):
         """Gets Rectangular polygon based on imageMaster.
            Helper function.
            Centered at origin."""
-        width = self.imageMaster.get_width()
-        height = self.imageMaster.get_height()
+        if self.hitboxSize:
+            width, height = self.hitboxSize
+        else:
+            width = self.imageMaster.get_width()
+            height = self.imageMaster.get_height()
         
         self.originPolygon = [
             Vector2(-width/2, -height/2),
@@ -152,6 +160,8 @@ class CollisionPhysics(simpleGE.Sprite):
         
         for point in self.originPolygon:
             rotated = point.rotate(-self.imageAngle)
+            # Add offset before shifting position
+            rotated += self.hitboxOffset
             # Calculate point not centered at origin
             calculatedPoint = rotated + Vector2(self.x, self.y)
             polygonEdgePoints.append(calculatedPoint)
@@ -210,3 +220,5 @@ class CollisionPhysics(simpleGE.Sprite):
 
 
     
+
+
